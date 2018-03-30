@@ -4,6 +4,7 @@ defmodule Phoenix.ApiVersions.MixProject do
   def project do
     [
       app: :phoenix_api_versions,
+      name: "Phoenix API Versions",
       version: "0.1.0",
       elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,

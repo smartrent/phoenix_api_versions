@@ -1,4 +1,25 @@
 defmodule PhoenixApiVersions.Plug do
+  @moduledoc """
+  A plug to be used in the `controller` macro in a Phoenix application's `Web` module. (The file containing this module is typically called `web.ex`)
+
+  Required for installation of the `PhoenixApiVersions` library.
+
+  ## Example
+
+      # In web.ex
+
+      def controller do
+        quote do
+          # ...
+
+          plug PhoenixApiVersions.Plug # <----- Add this
+
+          # ...
+        end
+      end
+
+  """
+
   alias Plug.Conn
   alias PhoenixApiVersions
 

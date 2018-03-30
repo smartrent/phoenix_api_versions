@@ -28,25 +28,54 @@ defmodule PhoenixApiVersions.Change do
   the controller and action pairs given. In this way, a single change module can
   affect multiple routes. (Useful if a logical change needs to happen in multiple places.)
 
-  ## Macro Helper Callbacks
+  ## Helper Callbacks
 
   When using the macro (`use PhoenixApiVersions.Change`), overrideable helper
-  functions are available that only expose the input or output JSON:
+  functions are available that only expose the input or output JSON instead of the entire Conn:
+
+  ### `transform_request_body_params(body_params, controller_module, action) :: transformed_body_params`
+
+  `conn.body_params` is passed to this function before sending to the controller. Return the transformed `body_params`.
+
+  ### `transform_request_query_params(query_params, controller_module, action) :: transformed_query_params`
+
+  `conn.query_params` is passed to this function before sending to the controller. Return the transformed `query_params`.
+
+  ### `transform_request_path_params(path_params, controller_module, action) :: transformed_path_params`
+
+  `conn.path_params` is passed to this function before sending to the controller. Return the transformed `path_params`.
+
+  ### `transform_response(view_output, controller_module, action) :: transformed_view_output`
+
+  The data returned by the view function (presumably a map) is passed to this function. Return the data with transformations applied.
+
+  ### Example
 
       defmodule MyApiChange do
         use PhoenixApiVersions.Change
 
-        def transform_request_params(params) do
-          # params is incoming conn.params
+        def routes do
+          [
+            {FooController, :create},
+            {FooController, :update},
+            {FooController, :index},
+            {BarController, :show}
+          ]
+        end
+
+        def transform_request_body_params(params, FooController, :create) do
+          transformed_params = # Perform transformations
+
+          transformed_params
         end
 
         # first argument is whatever the view output
         # second argument is the controller module
         # third argument is the controller action
-        def transform_response(output, MyFooController, :index) do
+        def transform_response(output, FooController, :index) do
           # return modified output
         end
-        def transform_response(output, MyBarController, :show) do
+        def transform_response(output, BarController, :show) do
           # return modified output
         end
       end

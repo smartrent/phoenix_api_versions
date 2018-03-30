@@ -1,17 +1,5 @@
 defmodule PhoenixApiVersions do
-  @moduledoc """
-  Documentation for PhoenixApiVersions.
-  """
-
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> PhoenixApiVersions.hello
-      :world
-
-  """
+  @moduledoc File.read!("README.md")
 
   alias Plug.Conn
   alias Phoenix.Controller
@@ -20,8 +8,86 @@ defmodule PhoenixApiVersions do
   def private_changes_key, do: :phoenix_api_versions_changes
   def private_process_output_key, do: :api_versioning_process_output?
 
+  @doc """
+  Generates the list of versions in the JSON REST API
+  """
   @callback versions() :: [Version.t()]
-  @callback route_not_found(Conn.t()) :: Conn.t()
+
+  @doc """
+  Processes the `Conn` whenever the consumer makes a request that cannot be mapped to a version.
+
+  (Example: The app defines `v1` and `v2` but the consumer visits API version `v3` or `hippopotamus`.)
+
+  This callback does not need to call `Conn.halt()`; the library does so immediately after this callback returns.
+
+  ## Example
+
+      def version_not_found(conn) do
+        conn
+        |> Conn.put_status(:not_found)
+        |> Controller.render("404.json", %{})
+      end
+
+  Note that in this example, a `render/1` function matching `"404.json"` must exist in the View.
+  (Presumably through a project-wide macro such as the `Web` module's `view` macro. This is a great hooking
+  point for application-level abstractions.)
+
+  The PhoenixApiVersions library intentionally refrains from assuming anything about the application,
+  and leaves this work up to library consumers.
+  """
+  @callback version_not_found(Conn.t()) :: Conn.t()
+
+  @doc """
+  Generates the version name from the `Conn`.
+
+  Applications may choose to allow API consumers to specify the API version in a number of ways:
+
+  1. Via a URL segment, such as `/api/v3/profile`
+  2. Via a request header, such as `X-Api-Version: v3`
+  3. Via the `Accept` header, such as `Accept: application/vnd.github.v3.json`
+
+  Rather than enforcing a specific method, PhoenixApiVersions provides this callback so that
+  any method can be used.
+
+  If the callback is unable to discover a version, applications can choose to do one of the following:
+
+  1. Provide a default fallback version
+  2. Return `nil` or any other value that isn't the `name` of a `Version`.
+
+  ## Examples
+
+      # Get the version from a URL segment.
+      # Assumes all API urls have `/:api_version/` in them.
+      def version_name(%{path_params: %{"api_version" => v}}), do: v
+
+      # Get the version from `X-Api-Version` header.
+      # Return the latest version as a fallback if none is provided.
+      def version_name(conn) do
+        conn
+        |> Plug.Conn.get_req_header("x-api-version")
+        |> List.first()
+        |> case do
+          nil -> "v3"
+          v -> v
+        end
+      end
+
+      # Get the version from `Accept` header.
+      # Return `nil` if none is provided so that the "not found" response is displayed.
+      def version_name(conn) do
+        accept_header =
+          conn
+          |> Plug.Conn.get_req_header("accept")
+          |> List.first()
+
+        ~r/application\/vnd\.github\.(?<version>.+)\.json/
+        |> Regex.named_captures("application/vnd.github.v3.json")
+        |> case do
+          %{"version" => v} -> v
+          nil -> nil
+        end
+      end
+  """
   @callback version_name(Conn.t()) :: any()
 
   defmacro __using__(_) do
@@ -35,7 +101,7 @@ defmodule PhoenixApiVersions do
   end
 
   def handle_invalid_version(%Conn{} = conn),
-    do: apply(configuration_module(), :route_not_found, [conn])
+    do: apply(configuration_module(), :version_not_found, [conn])
 
   def transform_request(%Conn{} = conn) do
     conn.private[private_changes_key()]
