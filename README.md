@@ -116,13 +116,15 @@ defmodule MyApp.ApiVersions.V1.ChangeNameToDescription do
     ]
   end
 
-  def transform_request_body_params(%{"name" => _} = params, DeviceController, action) when action in [:create, :update] do
+  def transform_request_body_params(%{"name" => _} = params, DeviceController, action)
+      when action in [:create, :update] do
     params
     |> Map.put("description", params["name"])
     |> Map.drop(["name"])
   end
 
-  def transform_response(%{data: device} = output, DeviceController, action) when action in [:create, :update, :show] do
+  def transform_response(%{data: device} = output, DeviceController, action)
+      when action in [:create, :update, :show] do
     output
     |> Map.put(:data, device_output_to_v1(device))
   end

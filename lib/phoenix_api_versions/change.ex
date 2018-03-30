@@ -83,8 +83,80 @@ defmodule PhoenixApiVersions.Change do
 
   alias Plug.Conn
 
+  @doc """
+  Generates a list of routes for which PhoenixApiVersions will transform the JSON
+  input/output using this change.
+
+  This is a "whitelist" of Controller/action pairs. For any route that doesn't
+  lead to a Controller/action pair in this list, PhoenixApiVersions will not apply
+  the change module.
+
+  ## Example
+
+      def routes do
+        [
+          {DeviceController, :show},
+          {DeviceController, :create},
+          {DeviceController, :update},
+          {DeviceController, :index}
+        ]
+      end
+
+  """
   @callback routes() :: [{module(), atom()}]
+
+  @doc """
+  Transforms the Conn before it is handled by the controller.
+
+  The conn can be modified in any way. For a typical use case,
+  Change modules should override the helper callbacks.
+  (`transform_request_body_params/3`, `transform_request_query_params/3`, and `transformed_path_params/3`.)
+
+  The helper callbacks are useful to avoid having to re-populate the `conn` with the new
+  params; simply return the transformed value and the base implementation of
+  `transform_request` will populate the `conn` appropriately.
+
+  Furthermore, the helper callbacks are passed the `controller_module` and `action` as the second and third arguments.
+  In this way, the module can decide how to transform the output based on the current route.
+
+  ## Example
+
+      def transform_request_body_params(%{"name" => _} = params, DeviceController, action)
+          when action in [:create, :update] do
+        params
+        |> Map.put("description", params["name"])
+        |> Map.drop(["name"])
+      end
+
+  """
   @callback transform_request(Conn.t()) :: Conn.t()
+
+  @doc """
+  Transforms view output before sending the response.
+
+  Is passed `assigns` as the second argument, as such:
+
+  ```elixir
+  transform_response(view_output, assigns)
+  ```
+
+  The transformed view data is returned. The `Conn` cannot be modified by this function. However, it is available via `assigns.conn`.
+
+  For a typical use case, Change modules should override the helper callback:
+  `transform_response/3`
+
+  This is passed the `view_output`, followed by the `controller_module` and `action`.
+  In this way, the module can decide how to transform the output based on the current route.
+
+  ## Example
+
+      def transform_response(%{data: device} = output, DeviceController, action)
+          when action in [:create, :update, :show] do
+        output
+        |> Map.put(:data, device_output_to_v1(device))
+      end
+
+  """
   @callback transform_response(any(), map()) :: any()
 
   defmacro __using__(_) do
