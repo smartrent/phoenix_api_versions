@@ -9,7 +9,8 @@ defmodule Phoenix.ApiVersions.MixProject do
       start_permanent: Mix.env() == :prod,
       description: description(),
       deps: deps(),
-      package: package()
+      package: package(),
+      source_url: "https://github.com/smartrent/phoenix_api_versions"
     ]
   end
 
@@ -17,14 +18,14 @@ defmodule Phoenix.ApiVersions.MixProject do
     [
       maintainers: ["Paul Statezny"],
       licenses: ["MIT"],
-      links: %{"GitHub" => "https://github.com/smartrent/phoenix_api_versions"}
+      links: %{"GitHub" => "https://github.com/smartrent/phoenix_api_versions"},
+      files: ~w(lib mix.exs README.md LICENSE.md)
     ]
   end
 
   defp description do
     """
-    Support multiple versions of a JSON API application in
-    Phoenix, while minimizing maintenance overhead
+    Support multiple versions of a JSON API application in Phoenix, while minimizing maintenance overhead
     """
   end
 
@@ -39,7 +40,8 @@ defmodule Phoenix.ApiVersions.MixProject do
   defp deps do
     [
       {:plug, "~> 1.0"},
-      {:phoenix, "~> 1.0"}
+      {:phoenix, "~> 1.0"},
+      {:ex_doc, ">= 0.0.0", only: :dev}
     ]
   end
 end
