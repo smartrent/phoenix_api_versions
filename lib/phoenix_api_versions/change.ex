@@ -163,8 +163,11 @@ defmodule PhoenixApiVersions.Change do
     quote do
       @behaviour PhoenixApiVersions.Change
 
+      alias Phoenix.Controller
+
       def transform_request(conn) do
-        %{phoenix_controller: c, phoenix_action: a} = conn.private
+        c = Controller.controller_module(conn)
+        a = Controller.action_name(conn)
 
         conn =
           conn
@@ -195,7 +198,9 @@ defmodule PhoenixApiVersions.Change do
       end
 
       def transform_response(output, assigns) do
-        %{phoenix_controller: c, phoenix_action: a} = assigns.conn.private
+        c = Controller.controller_module(assigns.conn)
+        a = Controller.action_name(assigns.conn)
+
         transform_response(output, c, a)
       end
 
