@@ -103,6 +103,10 @@ defmodule PhoenixApiVersions.PlugTest do
     }
   end
 
+  setup do
+    Application.put_env(:phoenix_api_versions, :versions, PhoenixApiVersions.PlugTest.TestVersions)
+  end
+
   describe "PhoenixApiVersions.Plug" do
     test "Assigns an ordered list of change modules into conn.private.phoenix_api_versions_changes" do
       transformed_conn = PhoenixApiVersions.Plug.call(conn("version1"), nil)
@@ -157,6 +161,56 @@ defmodule PhoenixApiVersions.PlugTest do
 
       # Assert body_params is exactly what we expect
       assert %{"body" => "Distinct V1 ChangeB Value"} === transformed_conn.body_params
+    end
+
+    defmodule TestVersionsWithBadData do
+      use PhoenixApiVersions
+
+      alias PhoenixApiVersions.Version
+
+      def version_not_found(conn), do: conn
+      def version_name(conn), do: conn.path_params["api_version"]
+      def versions do
+        [
+          %Version{
+            name: "version1",
+            changes: [
+              V1.ChangeA,
+              V1.ChangeB
+            ]
+          },
+          %{
+            name: "Not a Version struct!",
+            changes: []
+          },
+          %Version{
+            name: "version2",
+            changes: [
+              V2.Change
+            ]
+          },
+          %Version{
+            name: "version3",
+            changes: []
+          }
+        ]
+      end
+    end
+
+    test "Raises if any of the versions returned by versions/1 are not a PhoenixApiVersions.Version struct when faulty version below version of request" do
+      Application.put_env(:phoenix_api_versions, :versions, PhoenixApiVersions.PlugTest.TestVersionsWithBadData)
+
+      assert_raise RuntimeError, fn ->
+        PhoenixApiVersions.Plug.call(conn("version1"), nil)
+      end
+    end
+
+    test "Raises if any of the versions returned by versions/1 are not a PhoenixApiVersions.Version struct when faulty version above version of request" do
+      Application.put_env(:phoenix_api_versions, :versions, PhoenixApiVersions.PlugTest.TestVersionsWithBadData)
+
+      assert_raise RuntimeError, fn ->
+        PhoenixApiVersions.Plug.call(conn("version3"), nil)
+      end
     end
   end
 end
