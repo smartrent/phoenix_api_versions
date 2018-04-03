@@ -9,7 +9,38 @@ defmodule PhoenixApiVersions do
   def private_process_output_key, do: :phoenix_api_versions_process_output?
 
   @doc """
-  Generates the list of versions in the JSON REST API
+  Generates the list of valid versions and the changes defined by each version.
+
+  ## Example
+
+      alias PhoenixApiVersions.Version
+
+      def versions do
+        [
+          %Version{
+            name: "v1",
+            changes: [
+              V1.AccountTypes,
+              V1.CollapseEventRequest,
+              V1.EventAccountToUserID
+            ]
+          },
+          %Version{
+            name: "v2",
+            changes: [
+              V1.LegacyTransfers
+            ]
+          },
+          %Version{
+            name: "v3",
+            changes: [
+              V1.AutoexpandChargeDispute,
+              V1.AutoexpandChargeRule
+            ]
+          }
+        ]
+      end
+
   """
   @callback versions() :: [Version.t()]
 
@@ -141,8 +172,12 @@ defmodule PhoenixApiVersions do
           [module()] | {:error, :no_matching_version_found}
   defp changes_to_apply(conn, version_name, [%Version{name: version_name} | _] = versions) do
     versions
-    |> Enum.flat_map(fn %Version{changes: changes} ->
-      changes
+    |> Enum.flat_map(fn
+      (%Version{changes: changes}) ->
+        changes
+
+      (_) ->
+        raise_invalid_version_type()
     end)
     |> Enum.filter(fn change_module ->
       change_module
@@ -153,8 +188,17 @@ defmodule PhoenixApiVersions do
     end)
   end
 
-  defp changes_to_apply(conn, version_name, [_ | rest]),
-    do: changes_to_apply(conn, version_name, rest)
+  defp changes_to_apply(conn, version_name, [version | rest]) when is_map(version) do
+    if Map.get(version, :__struct__) == Version do
+      changes_to_apply(conn, version_name, rest)
+    else
+      raise_invalid_version_type()
+    end
+  end
 
   defp changes_to_apply(_conn, _version_name, []), do: {:error, :no_matching_version_found}
+
+  defp raise_invalid_version_type do
+    raise "Each version returned by versions/1 must be a PhoenixApiVersions.Version struct"
+  end
 end
