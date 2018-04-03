@@ -6,7 +6,7 @@ defmodule PhoenixApiVersions do
   alias PhoenixApiVersions.Version
 
   def private_changes_key, do: :phoenix_api_versions_changes
-  def private_process_output_key, do: :api_versioning_process_output?
+  def private_process_output_key, do: :phoenix_api_versions_process_output?
 
   @doc """
   Generates the list of versions in the JSON REST API

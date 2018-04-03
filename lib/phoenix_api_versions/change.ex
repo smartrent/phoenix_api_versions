@@ -172,13 +172,13 @@ defmodule PhoenixApiVersions.Change do
         conn =
           conn
           |> Map.put(:body_params, transform_request_body_params(conn.body_params, c, a))
-          |> Map.put(:query_params, transform_request_body_params(conn.query_params, c, a))
+          |> Map.put(:query_params, transform_request_query_params(conn.query_params, c, a))
           |> Map.put(:path_params, transform_request_path_params(conn.path_params, c, a))
 
         params =
           conn.params
-          |> Map.merge(conn.body_params)
           |> Map.merge(conn.query_params)
+          |> Map.merge(conn.body_params)
           |> Map.merge(conn.path_params)
 
         conn
