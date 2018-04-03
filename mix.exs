@@ -11,7 +11,9 @@ defmodule Phoenix.ApiVersions.MixProject do
       description: description(),
       deps: deps(),
       package: package(),
-      source_url: "https://github.com/smartrent/phoenix_api_versions"
+      source_url: "https://github.com/smartrent/phoenix_api_versions",
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: [coveralls: :test]
     ]
   end
 
@@ -30,19 +32,18 @@ defmodule Phoenix.ApiVersions.MixProject do
     """
   end
 
-  # Run "mix help compile.app" to learn about applications.
   def application do
     [
       extra_applications: [:logger]
     ]
   end
 
-  # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
       {:plug, "~> 1.0"},
       {:phoenix, "~> 1.0"},
-      {:ex_doc, ">= 0.0.0", only: :dev}
+      {:ex_doc, ">= 0.0.0", only: :dev},
+      {:excoveralls, "~> 0.8.1", only: [:dev, :test]}
     ]
   end
 end
