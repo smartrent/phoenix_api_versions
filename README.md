@@ -10,9 +10,9 @@ PhoenixApiVersions helps Phoenix applications support multiple JSON API versions
 
 API documentation is available at [https://hexdocs.pm/phoenix_api_versions](https://hexdocs.pm/phoenix_api_versions)
 
-## Getting Started
+## Installation
 
-### Adding PhoenixApiVersions To Your Project
+### Add PhoenixApiVersions To `web.ex`
 
 In the Phoenix `web.ex` file for your JSON API, add the plug to the `controller` section, and `use` the PhoenixApiVersions view macro in the `view` section.
 
@@ -23,36 +23,34 @@ Optionally, you may want to add a `render("404.json", _)` function in the `view`
 
 def controller do
   quote do
-    # ...
 
     plug PhoenixApiVersions.Plug
 
-    # ...
   end
 end
 
 def view do
   quote do
-    # ...
 
     use PhoenixApiVersions.View
 
+
+    # Optional; recommended if you have no other way to handle 404's yet
     def render("404.json", _) do
       %{error: "not_found"}
     end
 
-    # ...
   end
 end
 ```
 
-### Creating an ApiVersions Module
+### Create an ApiVersions Module
 
-Create a configuration module. We suggest calling this `ApiVersions`, namespaced inside your phoenix application's main namespace. (e.g. `MyApp.ApiVersions`)
-
-Make sure to `use PhoenixApiVersions` in this module.
+We suggest calling this `ApiVersions`, namespaced inside your phoenix application's main namespace. (e.g. `MyApp.ApiVersions`) Make sure to `use PhoenixApiVersions` in this module.
 
 The module must implement the `PhoenixApiVersions` behaviour, which includes `version_not_found/1`, `version_name/1`, and `versions/0`.
+
+#### Example
 
 ```elixir
 # lib/my_app_web/api_versions/api_versions.ex
@@ -93,7 +91,15 @@ defmodule MyApp.ApiVersions do
 end
 ```
 
-### Creating Change Modules
+### Add ApiVersions Module in `config.exs`
+
+Reference this module in your Phoenix application's `config.exs` as such:
+
+```elixir
+config :phoenix_api_versions, versions: MyApp.ApiVersions
+```
+
+### Add Change Modules
 
 Change modules are only used when the current route is found in `routes/1`.
 
