@@ -5,7 +5,7 @@ defmodule Phoenix.ApiVersions.MixProject do
     [
       app: :phoenix_api_versions,
       name: "Phoenix API Versions",
-      version: "0.1.2",
+      version: "1.0.0",
       elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,
       description: description(),
@@ -29,7 +29,7 @@ defmodule Phoenix.ApiVersions.MixProject do
 
   defp description do
     """
-    Support multiple versions of a JSON API application in Phoenix, while minimizing maintenance overhead
+    Support legacy API versions without the headache of legacy code
     """
   end
 
