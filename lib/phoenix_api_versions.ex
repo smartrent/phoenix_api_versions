@@ -105,6 +105,9 @@ defmodule PhoenixApiVersions do
 
       # Get the version from `Accept` header.
       # Return `nil` if none is provided so that the "not found" response is displayed.
+      #
+      # Assumes a format like this:
+      #   "application/vnd.github.v3.json"
       def version_name(conn) do
         accept_header =
           conn
@@ -112,7 +115,7 @@ defmodule PhoenixApiVersions do
           |> List.first()
 
         ~r/application\/vnd\.github\.(?<version>.+)\.json/
-        |> Regex.named_captures("application/vnd.github.v3.json")
+        |> Regex.named_captures(accept_header)
         |> case do
           %{"version" => v} -> v
           nil -> nil
