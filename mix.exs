@@ -13,7 +13,8 @@ defmodule Phoenix.ApiVersions.MixProject do
       package: package(),
       source_url: "https://github.com/smartrent/phoenix_api_versions",
       test_coverage: [tool: ExCoveralls],
-      preferred_cli_env: [coveralls: :test]
+      preferred_cli_env: [coveralls: :test],
+      docs: [main: "PhoenixApiVersions"]
     ]
   end
 

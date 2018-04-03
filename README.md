@@ -26,7 +26,6 @@ PhoenixApiVersions simply does the following:
 -------------
 |           |
 |    v3     |
-|           |
 | (current) |
 |           |
 |     ▲     |
@@ -40,7 +39,6 @@ PhoenixApiVersions simply does the following:
 |     ▼     |
 |           |
 |    v1     |
-|           |
 |           |
 -------------
 ```
