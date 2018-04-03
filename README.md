@@ -1,7 +1,7 @@
 # PhoenixApiVersions
 
-> ### Move your API forward. Avoid legacy code.
-> PhoenixApiVersions helps Phoenix applications support multiple JSON API versions while minimizing maintenance overhead.
+> ### Move your API forward. Support legacy versions with ease.
+> PhoenixApiVersions helps Phoenix JSON API apps support legacy versions while minimizing maintenance overhead.
 
 [![Master](https://travis-ci.org/smartrent/phoenix_api_versions.svg?branch=master)](https://travis-ci.org/smartrent/phoenix_api_versions)
 [![Hex.pm Version](http://img.shields.io/hexpm/v/phoenix_api_versions.svg?style=flat)](https://hex.pm/packages/phoenix_api_versions)
