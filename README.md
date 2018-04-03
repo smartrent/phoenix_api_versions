@@ -1,5 +1,9 @@
 # PhoenixApiVersions
 
+[![Master](https://travis-ci.org/smartrent/phoenix_api_versions.svg?branch=master)](https://travis-ci.org/smartrent/phoenix_api_versions)
+[![Hex.pm Version](http://img.shields.io/hexpm/v/phoenix_api_versions.svg?style=flat)](https://hex.pm/packages/phoenix_api_versions)
+[![Coverage Status](https://coveralls.io/repos/github/smartrent/phoenix_api_versions/badge.svg?branch=master)](https://coveralls.io/github/smartrent/phoenix_api_versions?branch=master)
+
 PhoenixApiVersions helps Phoenix applications support multiple JSON API versions while minimizing maintenance overhead.
 
 ## Documentation
