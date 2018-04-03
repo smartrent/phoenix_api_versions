@@ -1,14 +1,88 @@
 # PhoenixApiVersions
 
+> ### Move your API forward. Avoid legacy code.
+> PhoenixApiVersions helps Phoenix applications support multiple JSON API versions while minimizing maintenance overhead.
+
 [![Master](https://travis-ci.org/smartrent/phoenix_api_versions.svg?branch=master)](https://travis-ci.org/smartrent/phoenix_api_versions)
 [![Hex.pm Version](http://img.shields.io/hexpm/v/phoenix_api_versions.svg?style=flat)](https://hex.pm/packages/phoenix_api_versions)
 [![Coverage Status](https://coveralls.io/repos/github/smartrent/phoenix_api_versions/badge.svg?branch=master)](https://coveralls.io/github/smartrent/phoenix_api_versions?branch=master)
 
-PhoenixApiVersions helps Phoenix applications support multiple JSON API versions while minimizing maintenance overhead.
-
 ## Documentation
 
 API documentation is available at [https://hexdocs.pm/phoenix_api_versions](https://hexdocs.pm/phoenix_api_versions)
+
+## How Does It Work?
+
+### It's A JSON Translation Layer
+
+PhoenixApiVersions simply does the following:
+
+1. Modifies incoming JSON before it reaches the controller
+2. Modifies outgoing JSON right before sending the response
+
+### Versions Are Defined In Layers
+
+```
+-------------
+|           |
+|    v3     |
+|           |
+| (current) |
+|           |
+|     ▲     |
+------|------  <-- v2/v3 translation layer
+|     ▼     |
+|           |
+|    v2     |
+|           |
+|     ▲     |
+------|------  <-- v1/v2 translation layer
+|     ▼     |
+|           |
+|    v1     |
+|           |
+|           |
+-------------
+```
+
+Each legacy version is responsible for transforming JSON to and from the shape expected/returned by the next version. **Apart from bug fixes, developers will only have to maintain middleware from the last version.**
+
+Assume an API whose **current version is v3**.
+
+- v1 middleware transforms incoming JSON to the shape that v2 expects.
+- v2 middleware transforms incoming JSON to the shape that v3 expects.
+
+The request reaches the controller in the shape of the current version. The controller and view respond with "v3 JSON".
+
+- v2 middleware transforms outgoing v3 JSON to the shape that v2 should return.
+- v1 middleware then transforms the v2 JSON to the shape that v1 should return.
+
+Once v4 comes out, developers will simply build the transformation layer for v3-to-v4 (and back).
+
+### Supports Any Versioning Mechanism
+
+The version can be specified in any way:
+
+- URL (`/api/v1/...`)
+- Accept header (`Accept: application/vnd.github.v3.json`)
+- Custom header (`X-Api-Version: 2016-01-20`)
+- Anything else in `conn`
+
+### Benefits
+
+#### ✅ Limits Legacy Code
+
+PhoenixApiVersions only allows developers to define old versions by **transforming JSON**.
+
+It assumes that these JSON-transforming middleware functions will not perform database calls or heavy computation. (Although this is not completely prohibited.)
+
+#### ✅ Flexible
+
+If your application has one or two legacy API endpoints that simply need to be handled differently, that's completely posslble.
+
+#### ✅ Ensure Consistent Business Rules Across API Versions
+
+Every version of a given API endpoint will reach the same controller function, making it much less likely that subtle differences between business rules will crystallize over time.
 
 ## Installation
 
