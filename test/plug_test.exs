@@ -66,6 +66,10 @@ defmodule PhoenixApiVersions.PlugTest do
       conn.path_params["api_version"]
     end
 
+    def apply_changes_for_request?(conn) do
+      conn.path_params["api_version"] != nil
+    end
+
     def versions do
       [
         %Version{
@@ -163,6 +167,16 @@ defmodule PhoenixApiVersions.PlugTest do
       assert %{"body" => "Distinct V1 ChangeB Value"} === transformed_conn.body_params
     end
 
+    test "Does not assign or apply any change modules (and sets process_output to false) if apply_changes_for_request? returns false" do
+      conn = conn(nil, MatchedController, :matched_action)
+
+      conn_with_do_not_process_output_set =
+        conn
+        |> Conn.put_private(PhoenixApiVersions.private_process_output_key(), false)
+
+      assert ^conn_with_do_not_process_output_set = PhoenixApiVersions.Plug.call(conn, nil)
+    end
+
     defmodule TestVersionsWithBadData do
       use PhoenixApiVersions
 
@@ -170,6 +184,7 @@ defmodule PhoenixApiVersions.PlugTest do
 
       def version_not_found(conn), do: conn
       def version_name(conn), do: conn.path_params["api_version"]
+      def apply_changes_for_request?(_), do: true
       def versions do
         [
           %Version{
