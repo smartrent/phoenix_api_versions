@@ -108,7 +108,11 @@ defmodule PhoenixApiVersions.PlugTest do
   end
 
   setup do
-    Application.put_env(:phoenix_api_versions, :versions, PhoenixApiVersions.PlugTest.TestVersions)
+    Application.put_env(
+      :phoenix_api_versions,
+      :versions,
+      PhoenixApiVersions.PlugTest.TestVersions
+    )
   end
 
   describe "PhoenixApiVersions.Plug" do
@@ -116,10 +120,10 @@ defmodule PhoenixApiVersions.PlugTest do
       transformed_conn = PhoenixApiVersions.Plug.call(conn("version1"), nil)
 
       assert [
-        V1.ChangeA,
-        V1.ChangeB,
-        V2.Change
-      ] = transformed_conn.private.phoenix_api_versions_changes
+               V1.ChangeA,
+               V1.ChangeB,
+               V2.Change
+             ] = transformed_conn.private.phoenix_api_versions_changes
     end
 
     test "Only adds change modules to conn.private.phoenix_api_versions_changes if their routes/0 definition contains the current route" do
@@ -134,10 +138,10 @@ defmodule PhoenixApiVersions.PlugTest do
       transformed_conn = PhoenixApiVersions.Plug.call(conn, nil)
 
       assert %Conn{
-        halted: true,
-        status: 404,
-        resp_body: "{\"error\": \"not_found\"}",
-      } = transformed_conn
+               halted: true,
+               status: 404,
+               resp_body: "{\"error\": \"not_found\"}"
+             } = transformed_conn
     end
 
     test "Sets conn.private.phoenix_api_versions_process_output? to true so that the View macro can intercept the output" do
@@ -185,6 +189,7 @@ defmodule PhoenixApiVersions.PlugTest do
       def version_not_found(conn), do: conn
       def version_name(conn), do: conn.path_params["api_version"]
       def apply_changes_for_request?(_), do: true
+
       def versions do
         [
           %Version{
@@ -213,7 +218,11 @@ defmodule PhoenixApiVersions.PlugTest do
     end
 
     test "Raises if any of the versions returned by versions/1 are not a PhoenixApiVersions.Version struct when faulty version below version of request" do
-      Application.put_env(:phoenix_api_versions, :versions, PhoenixApiVersions.PlugTest.TestVersionsWithBadData)
+      Application.put_env(
+        :phoenix_api_versions,
+        :versions,
+        PhoenixApiVersions.PlugTest.TestVersionsWithBadData
+      )
 
       assert_raise RuntimeError, fn ->
         PhoenixApiVersions.Plug.call(conn("version1"), nil)
@@ -221,7 +230,11 @@ defmodule PhoenixApiVersions.PlugTest do
     end
 
     test "Raises if any of the versions returned by versions/1 are not a PhoenixApiVersions.Version struct when faulty version above version of request" do
-      Application.put_env(:phoenix_api_versions, :versions, PhoenixApiVersions.PlugTest.TestVersionsWithBadData)
+      Application.put_env(
+        :phoenix_api_versions,
+        :versions,
+        PhoenixApiVersions.PlugTest.TestVersionsWithBadData
+      )
 
       assert_raise RuntimeError, fn ->
         PhoenixApiVersions.Plug.call(conn("version3"), nil)

@@ -27,7 +27,7 @@ defmodule PhoenixApiVersions.ViewTest do
     def transform_response(%{data: data} = response, WidgetController, :index) do
       transformed_data =
         data
-        |> Enum.map(& %{name: &1.identifier})
+        |> Enum.map(&%{name: &1.identifier})
 
       response
       |> Map.put(:data, transformed_data)
@@ -57,7 +57,7 @@ defmodule PhoenixApiVersions.ViewTest do
     def transform_response(%{data: data} = response, WidgetController, :index) do
       transformed_data =
         data
-        |> Enum.map(& %{identifier: &1.description})
+        |> Enum.map(&%{identifier: &1.description})
 
       response
       |> Map.put(:data, transformed_data)
@@ -75,18 +75,18 @@ defmodule PhoenixApiVersions.ViewTest do
   end
 
   def assigns(action) do
-    private = %{
-      phoenix_controller: WidgetController,
-      phoenix_action: action
-    }
-    |> Map.put(PhoenixApiVersions.private_process_output_key(), true)
-    |> Map.put(PhoenixApiVersions.private_changes_key(), [
-      V1.IdentifierToName,
-      V2.DescriptionToIdentifier
-    ])
+    private =
+      %{
+        phoenix_controller: WidgetController,
+        phoenix_action: action
+      }
+      |> Map.put(PhoenixApiVersions.private_process_output_key(), true)
+      |> Map.put(PhoenixApiVersions.private_changes_key(), [
+        V1.IdentifierToName,
+        V2.DescriptionToIdentifier
+      ])
 
-    conn =
-      %Conn{private: private}
+    conn = %Conn{private: private}
 
     %{conn: conn}
   end
@@ -101,20 +101,26 @@ defmodule PhoenixApiVersions.ViewTest do
 
       {:ok, %{widgets: widgets}}
     end
-    test "Applies all applicable changes in reverse order defined in conn.private.phoenix_api_versions_changes", %{widgets: widgets} do
-      output = WidgetView.render(
-        "index.json",
-        Map.put(assigns(:index), :widgets, widgets)
-      )
 
-      assert %{data: [
-        %{name: "foo"},
-        %{name: "bar"},
-        %{name: "baz"}
-      ]} = output
+    test "Applies all applicable changes in reverse order defined in conn.private.phoenix_api_versions_changes",
+         %{widgets: widgets} do
+      output =
+        WidgetView.render(
+          "index.json",
+          Map.put(assigns(:index), :widgets, widgets)
+        )
+
+      assert %{
+               data: [
+                 %{name: "foo"},
+                 %{name: "bar"},
+                 %{name: "baz"}
+               ]
+             } = output
     end
 
-    test "Does not apply changes is conn.private.phoenix_api_versions_process_output? is not true", %{widgets: widgets} do
+    test "Does not apply changes is conn.private.phoenix_api_versions_process_output? is not true",
+         %{widgets: widgets} do
       %{conn: conn} = assigns(:index)
 
       conn =
@@ -123,11 +129,13 @@ defmodule PhoenixApiVersions.ViewTest do
 
       output = WidgetView.render("index.json", %{conn: conn, widgets: widgets})
 
-      assert %{data: [
-        %{description: "foo"},
-        %{description: "bar"},
-        %{description: "baz"}
-      ]} = output
+      assert %{
+               data: [
+                 %{description: "foo"},
+                 %{description: "bar"},
+                 %{description: "baz"}
+               ]
+             } = output
     end
   end
 end

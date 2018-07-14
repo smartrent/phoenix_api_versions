@@ -145,7 +145,7 @@ defmodule PhoenixApiVersions do
 
       def apply_changes_for_request?(%Conn{}), do: true
 
-      defoverridable [apply_changes_for_request?: 1]
+      defoverridable apply_changes_for_request?: 1
     end
   end
 
@@ -195,10 +195,10 @@ defmodule PhoenixApiVersions do
   defp changes_to_apply(conn, version_name, [%Version{name: version_name} | _] = versions) do
     versions
     |> Enum.flat_map(fn
-      (%Version{changes: changes}) ->
+      %Version{changes: changes} ->
         changes
 
-      (_) ->
+      _ ->
         raise_invalid_version_type()
     end)
     |> Enum.filter(fn change_module ->
