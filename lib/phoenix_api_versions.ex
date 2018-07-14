@@ -124,9 +124,28 @@ defmodule PhoenixApiVersions do
   """
   @callback version_name(Conn.t()) :: any()
 
+  @doc """
+  Return whether or not any changes should be applied at all
+  for the given request.
+
+  This should be used as an escape hatch for routes that shouldn't
+  be governed by PhoenixApiVersions.
+
+  For example, most route definitions might begin with `/api/:api_version`,
+  and there might be hard-coded route definitions above overriding a
+  single version, so that they start with `/api/v1`. In this case,
+  `apply_changes_for_request?` might be configured to return `false`
+  if `api_version` is missing from `params`.
+  """
+  @callback apply_changes_for_request?(Conn.t()) :: boolean()
+
   defmacro __using__(_) do
     quote do
       @behaviour PhoenixApiVersions
+
+      def apply_changes_for_request?(%Conn{}), do: true
+
+      defoverridable apply_changes_for_request?: 1
     end
   end
 
@@ -176,10 +195,10 @@ defmodule PhoenixApiVersions do
   defp changes_to_apply(conn, version_name, [%Version{name: version_name} | _] = versions) do
     versions
     |> Enum.flat_map(fn
-      (%Version{changes: changes}) ->
+      %Version{changes: changes} ->
         changes
 
-      (_) ->
+      _ ->
         raise_invalid_version_type()
     end)
     |> Enum.filter(fn change_module ->
@@ -200,6 +219,16 @@ defmodule PhoenixApiVersions do
   end
 
   defp changes_to_apply(_conn, _version_name, []), do: {:error, :no_matching_version_found}
+
+  @doc """
+  Return whether or not any changes should be applied at all for the given request.
+
+  (Used as an escape hatch for routes that shouldn't be governed by PhoenixApiVersions.)
+  """
+  @spec apply_changes_for_request?(Conn.t()) :: boolean()
+  def apply_changes_for_request?(conn) do
+    apply(configuration_module(), :apply_changes_for_request?, [conn])
+  end
 
   defp raise_invalid_version_type do
     raise "Each version returned by versions/1 must be a PhoenixApiVersions.Version struct"
